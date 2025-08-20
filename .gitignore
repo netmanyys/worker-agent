@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+.env
+.env.*
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Ansible
+*.retry
+
+# Editors/OS
+.vscode/
+.idea/
+.DS_Store
+
+# Logs & build
+*.log
+dist/
+build/
+
+# Docker/compose artifacts (local only)
+docker-data/
+compose.override.yml
+
+# Keys & secrets (keep these out of Git)
+.ssh/
+*.pem
+*.key
+*.crt
+*.pub
+
+# Node (if you add frontend later)
+node_modules/

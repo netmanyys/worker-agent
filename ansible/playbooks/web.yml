@@ -1,0 +1,17 @@
+- hosts: web
+  gather_facts: true         # no sudo needed for facts
+  tasks:
+    - name: Show kernel version (no sudo)
+      command: uname -r
+
+    - name: Write MOTD (needs sudo)
+      become: true
+      copy:
+        dest: /etc/motd
+        content: "Managed by Ansible on {{ inventory_hostname }}\n"
+
+    - name: Install curl on Alpine (needs sudo)
+      become: true
+      command: apk add --no-cache curl
+      args:
+        creates: /usr/bin/curl

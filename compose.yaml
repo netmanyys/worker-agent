@@ -1,0 +1,68 @@
+version: "3.8"
+
+services:
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        GO_VERSION: "1.22.5"
+        UID: ${UID-1000}
+        GID: ${GID-1000}
+    image: worker-agent:min-core
+    container_name: worker-agent
+    tty: true
+    stdin_open: true
+    environment:
+      ANSIBLE_HOST_KEY_CHECKING: "False"
+      ANSIBLE_CONFIG: /opt/ansible/ansible.cfg
+    working_dir: /opt/ansible
+    volumes:
+      - /home/yunshengyan/.ssh/ansible_test:/home/agent/.ssh/id_ed25519:ro
+      - ./ansible:/opt/ansible:ro
+      - ./:/workspace
+    networks:
+      testnet:
+        ipv4_address: 10.0.0.10
+    environment:
+      ANSIBLE_HOST_KEY_CHECKING: "False"
+      ANSIBLE_CONFIG: /opt/ansible/ansible.cfg
+      ANSIBLE_INVENTORY: /opt/ansible/inventories/hosts.ini
+      ANSIBLE_PRIVATE_KEY: /home/agent/.ssh/id_ed25519
+      ANSIBLE_WEB_TOKEN: supersecret123        # <<< set your token
+    ports:
+      - "8000:8000"
+    command: >
+      bash -lc 'uvicorn webapp.main:app --host 0.0.0.0 --port 8000'
+
+  target-1:
+    build:
+      context: ./targets
+      dockerfile: Dockerfile
+    image: ssh-target:bookworm
+    container_name: target-1
+    networks:
+      testnet:
+        ipv4_address: 10.0.0.11
+    volumes:
+      - /home/yunshengyan/.ssh/ansible_test.pub:/home/ubuntu/.ssh/authorized_keys:ro
+
+  target-2:
+    build:
+      context: ./targets
+      dockerfile: Dockerfile
+    image: ssh-target:bookworm
+    container_name: target-2
+    networks:
+      testnet:
+        ipv4_address: 10.0.0.12
+    volumes:
+      - /home/yunshengyan/.ssh/ansible_test.pub:/home/ubuntu/.ssh/authorized_keys:ro
+
+networks:
+  testnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.0.0/24
+          gateway: 10.0.0.1
